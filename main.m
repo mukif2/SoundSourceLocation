@@ -1,5 +1,9 @@
-method = str2func('music');
-source = 'whitenoise';
+clear
+close all
+clc
+warning('off');
+method = str2func('gccphat_wiener');
+source = 'chirps';
 
 noisetype = {'free-flight', 'hovering', 'rectangle', 'spinning', 'updown'};
 azimuth = [45, 60, 75, 90];
@@ -12,7 +16,7 @@ tolerance = (2*sind(10/2))^2;
 for SNR = 40:-20:-20
 error_sq = [];
 
-for n = noisetype(2:end)
+for n = noisetype
     filename = ['DREGON-noise-only_recordings/DREGON_', n{1},...
         '_nosource_room2.wav'];
     noise = audioread(filename);
@@ -35,10 +39,14 @@ for r = 1:repeat
     len = floor(fs*0.2);
     audio_clip = select_clip(audio, len);
     noise_clip = select_clip(noise, len);
+%     m = max(max(audio_clip));
+%     audio_clip = audio_clip / m;
+%     noise_clip = noise_clip / m;
     audio_noisy = add_noise(audio_clip, noise_clip, SNR);
     
     % estimate azimuth and elevation, calculate RSE
-    [a_est, e_est] = method(audio_noisy);
+%     noise_c = noise_clip;
+    [a_est, e_est] = method(audio_noisy,noise_clip);
     error_sq(end+1) = square_error(a, a_est, e, e_est);
     
     % comment the following line for compact output
